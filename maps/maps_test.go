@@ -37,17 +37,73 @@ func compareError(t *testing.T, result, expected error) {
 }
 
 func TestAdd(t *testing.T) {
-	dictionary:= Dictionary{}
-	dictionary.Add("test", "this is just a test")
+	t.Run("new word", func(t *testing.T) {
+		dictionary:= Dictionary{}
+		word:= "test"
+		definition:= "this is just a test"
 
-	expected:= "this is just a test"
-	result, err := dictionary.Search("test")
+		err:= dictionary.Add(word, definition)
+
+		compareError(t, err, nil)
+		compareDefinition(t, dictionary, word, definition)
+	})
+
+	t.Run("existing word", func(t *testing.T) {
+		word:= "test"
+		definition:= "this is just a test"
+		dictionary:= Dictionary{word: definition}
+		err:= dictionary.Add(word, "new test")
+
+		compareError(t, err, ErrExistingWord)
+		compareDefinition(t, dictionary, word, definition)
+	})
+
+}
+
+func compareDefinition(t *testing.T, dictionary Dictionary, word, definition string) {
+	t.Helper()
+
+	result, err := dictionary.Search(word)
 	if err != nil {
-		t.Fatal("couldn't find the word added")
+		t.Fatal("should have found added word:", err)
 	}
 
+	if definition != result {
+		t.Errorf("result '%s', expected '%s'", result, definition)
+	}
+}
 
-	if expected != result {
-		t.Errorf("result '%s', expected '%s'", result, expected)
+func TestUpdate(t *testing.T) {
+	t.Run("existing word", func(t *testing.T) {
+		word:= "teste"
+		definition:= "this is just a test"
+		dictionary:= Dictionary{word: definition}
+		newDefinition:= "new definition"
+		err:= dictionary.Update(word, newDefinition)
+
+		compareError(t, err, nil)
+		compareDefinition(t, dictionary, word, newDefinition)
+	})
+	
+	t.Run("new word", func(t *testing.T) {
+		word:= "test"
+		definition:= "this is just a test"
+		dictionary:= Dictionary{}
+
+		err:= dictionary.Update(word, definition)
+
+		compareError(t, err, ErrNonExistentWord)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	word:= "test"
+	dictionary:= Dictionary{word: "test of definition"}
+
+	dictionary.Delete(word)
+
+	_, err := dictionary.Search(word)
+	if err != ErrNotFound {
+		t.Errorf("'%s' is expected to be deleted", word)
 	}
 }
