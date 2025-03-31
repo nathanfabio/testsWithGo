@@ -5,14 +5,17 @@ import "reflect"
 func Browse(x interface{}, fn func(input string)) {
 	value := reflect.ValueOf(x)
 
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	}
+
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i)
 
-		if field.Kind() == reflect.String {
+		switch field.Kind() {
+		case reflect.String:
 			fn(field.String())
-		}
-
-		if field.Kind() == reflect.Struct {
+		case reflect.Struct:
 			Browse(field.Interface(), fn)
 		}
 	}
