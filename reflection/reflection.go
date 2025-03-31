@@ -7,6 +7,9 @@ func Browse(x interface{}, fn func(input string)) {
 
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i)
-		fn(field.String())
+
+		if field.Kind() == reflect.String {
+			fn(field.String())
+		}
 	}
 }

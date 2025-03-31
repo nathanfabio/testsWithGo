@@ -13,7 +13,7 @@ func TestBrowse(t *testing.T) {
 		ExpectedCalls []string
 	}{
 		{
-			"Struct with a string",
+			"Struct with a string type",
 			struct {
 				Name string
 			}{"Nathan"},
@@ -26,6 +26,14 @@ func TestBrowse(t *testing.T) {
 				City string
 			}{"Nathan", "Santos"},
 			[]string{"Nathan", "Santos"},
+		},
+		{
+			"Struct without a string type",
+			struct {
+				Name string
+				Age int
+			}{"Nathan", 25},
+			[]string{"Nathan"},
 		},
 	}
 
