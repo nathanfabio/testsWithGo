@@ -37,6 +37,14 @@ func TestBrowse(t *testing.T) {
 			},
 			[]string{"Nathan", "Santos"},
 		},
+		{
+			"Slices",
+			[]Profile{
+				{25, "Bebedouro"},
+				{26, "Santos"},
+			},
+			[]string{"Bebedouro", "Santos"},
+		},
 	}
 
 	for _, test := range cases {
