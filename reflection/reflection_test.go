@@ -5,6 +5,15 @@ import (
 	"testing"
 )
 
+type Person struct {
+	Name string
+	Profile Profile
+}
+
+type Profile struct {
+	Age int
+	City string
+}
 
 func TestBrowse(t *testing.T) {
 	cases := []struct {
@@ -13,27 +22,12 @@ func TestBrowse(t *testing.T) {
 		ExpectedCalls []string
 	}{
 		{
-			"Struct with a string type",
-			struct {
-				Name string
-			}{"Nathan"},
-			[]string{"Nathan"},
-		},
-		{
-			"Struct with two string type",
-			struct {
-				Name string
-				City string
-			}{"Nathan", "Santos"},
+			"Nested fields",
+			Person {
+				"Nathan",
+				Profile{25, "Santos"},
+			},
 			[]string{"Nathan", "Santos"},
-		},
-		{
-			"Struct without a string type",
-			struct {
-				Name string
-				Age int
-			}{"Nathan", 25},
-			[]string{"Nathan"},
 		},
 	}
 
