@@ -8,36 +8,37 @@ import (
 )
 
 func TestRunner(t *testing.T) {
-	t.Run("return an error if server doesn't respond within 10s", func(t *testing.T) {
-		serverA := delayedServer(11 * time.Second)
-		serverB := delayedServer(12 * time.Second)
+	t.Run("compares the speed of servers, returning the fastest one", func(t *testing.T) {
+		serverSlow := delayedServer(20 * time.Millisecond)
+		serverFast := delayedServer(0 * time.Millisecond)
 
-		defer serverA.Close()
-		defer serverB.Close()
+		defer serverSlow.Close()
+		defer serverFast.Close()
 
-		_, err := Runner(serverA.URL, serverB.URL)
-		if err == nil {
-			t.Errorf("error not found")
+		URLSlow := serverSlow.URL
+		URLFast := serverFast.URL
+
+		expected := URLFast
+		result, err := Runner(URLSlow, URLFast)
+		if err != nil {
+			t.Fatalf("didn't expect an error, but got one %v", err)
+		}
+
+		if result != expected {
+			t.Errorf("result '%s', expected '%s'", result, expected)
 		}
 	})
 
+	t.Run("return an error if server doesn't respond within 10s", func(t *testing.T) {
+		server := delayedServer(25 * time.Millisecond)
 
-	serverSlow := delayedServer(20 * time.Millisecond)
-	serverFast := delayedServer(0 * time.Millisecond)
-	
-	defer serverSlow.Close()
-	defer serverFast.Close()
+		defer server.Close()
 
-	URLSlow := serverSlow.URL
-	URLFast := serverFast.URL
-
-	expected := URLFast
-	result, _ := Runner(URLSlow, URLFast)
-
-	if result != expected {
-		t.Errorf("result '%s', expected '%s'", result, expected)
-	}
-
+		_, err := Configurable(server.URL, server.URL, 20 * time.Millisecond)
+		if err == nil {
+			t.Error("was expecting an error, but I didn't get one")
+		}
+	})
 }
 
 func delayedServer(delay time.Duration) *httptest.Server {
