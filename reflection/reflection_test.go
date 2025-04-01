@@ -45,6 +45,14 @@ func TestBrowse(t *testing.T) {
 			},
 			[]string{"Bebedouro", "Santos"},
 		},
+		{
+			"Arrays",
+			[2]Profile{
+				{25, "Bebedouro"},
+				{30, "Melbourne"},
+			},
+			[]string{"Bebedouro", "Melbourne"},
+		},
 	}
 
 	for _, test := range cases {
@@ -58,5 +66,34 @@ func TestBrowse(t *testing.T) {
 			}
 		})
 	}
+
+
+	t.Run("maps", func(t *testing.T) {
+		mapA := map[string]string{
+			"Bebedouro": "Santos",
+			"Santos": "Melbourne",
+		}
+
+		var result []string
+		Browse(mapA, func(input string) {
+			result = append(result, input)
+		})
+
+		check(t, result, "Santos")
+		check(t, result, "Melbourne")
+	})
 	
+}
+
+func check(t *testing.T, haystack []string, needle string) {
+	contain := false
+	for _, x := range haystack {
+		if x == needle {
+			contain = true
+		}
+	}
+
+	if !contain {
+		t.Errorf("'%v' was expected to contain '%s', but it didn't", haystack, needle)
+	}
 }

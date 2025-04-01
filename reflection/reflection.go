@@ -5,21 +5,24 @@ import "reflect"
 func Browse(x interface{}, fn func(input string)) {
 	value := getValue(x)
 
-	if value.Kind() == reflect.Slice {
-		for i := 0; i < value.Len(); i++ {
-			Browse(value.Index(i).Interface(),fn)
-		}
-		return
+	brwseValue := func(value reflect.Value) {
+		Browse(value.Interface(), fn)
 	}
 
-	for i := 0; i < value.NumField(); i++ {
-		field := value.Field(i)
-
-		switch field.Kind() {
-		case reflect.String:
-			fn(field.String())
-		case reflect.Struct:
-			Browse(field.Interface(), fn)
+	switch value.Kind() {
+	case reflect.String:
+		fn(value.String())
+	case reflect.Struct:
+		for i := 0; i < value.NumField(); i++ {
+			brwseValue(value.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < value.Len(); i++ {
+			brwseValue(value.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range value.MapKeys() {
+			brwseValue(value.MapIndex(key))
 		}
 	}
 }
