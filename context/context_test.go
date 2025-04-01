@@ -2,6 +2,7 @@ package context
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,23 +41,23 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 	}
 }
 
-// func (s *SpyStore) Cancel() {
-// 	s.cancelled = true
-// }
+type SpyResponseWriter struct {
+	written bool
+}
 
-// func (s *SpyStore) assertWasCancelled() {
-// 	s.t.Helper()
-// 	if !s.cancelled {
-// 		s.t.Errorf("store wasn't notified to cancell")
-// 	}
-// }
+func (s *SpyResponseWriter) Header() http.Header {
+	s.written = true
+	return nil
+}
 
-// func (s *SpyStore) assertWasNotCancelled() {
-// 	s.t.Helper()
-// 	if !s.cancelled {
-// 		s.t.Errorf("store was notified to cancell")
-// 	}
-// }
+func (s *SpyResponseWriter) Write([]byte) (int, error) {
+	s.written = true
+	return 0, errors.New("not implemented")
+}
+
+func (s *SpyResponseWriter) WriteHeader(statusCode int) {
+	s.written = true
+}
 
 func TestHandler(t *testing.T) {
 	data := "Hello World"
@@ -72,9 +73,13 @@ func TestHandler(t *testing.T) {
 		time.AfterFunc(5 * time.Millisecond, cancel)
 		request = request.WithContext(cancellingCtx)
 
-		response := httptest.NewRecorder()
+		response := &SpyResponseWriter{}
 
 		svr.ServeHTTP(response, request)
+
+		if response.written {
+			t.Error("a response shouldn't have been written")
+		}
 	})
 
 	t.Run("return data from store", func(t *testing.T) {
