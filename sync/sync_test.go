@@ -13,7 +13,7 @@ func TestCounter(t *testing.T) {
 		counter.Increment()
 		counter.Increment()
 
-		checkCounter(t, counter, 3)
+		checkCounter(t, &counter, 3)
 	})
 
 	t.Run("runs concurrently safely", func(t *testing.T) {
@@ -31,11 +31,11 @@ func TestCounter(t *testing.T) {
 		}
 		wg.Wait()
 
-		checkCounter(t, counter, expectedCount)
+		checkCounter(t, &counter, expectedCount)
 	})
 }
 
-func checkCounter(t *testing.T, result Counter, expected int) {
+func checkCounter(t *testing.T, result *Counter, expected int) {
 	t.Helper()
 	if result.Value() != expected {
 		t.Errorf("result %d, expected %d", result.Value(), expected)

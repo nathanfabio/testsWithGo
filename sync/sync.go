@@ -16,3 +16,7 @@ func (c *Counter) Increment() {
 func (c *Counter) Value() int {
 	return c.value
 }
+
+func NewCounter() *Counter {
+	return &Counter{}
+}
